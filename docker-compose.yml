@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # ----------------------------------------
+  # 1. PostgreSQL (База данных)
+  # ----------------------------------------
+  db:
+    image: postgres:15-alpine
+    container_name: exchanger-db
+    environment:
+      # Настройки, которые соответствуют вашему проекту:
+      POSTGRES_DB: exchanger_db
+      POSTGRES_USER: exchanger_user  # <-- Используйте свое имя пользователя
+      POSTGRES_PASSWORD: your_strong_password # <-- Установите свой пароль
+    volumes:
+      # Сохранение данных на хост-машине (чтобы данные не терялись при перезапуске)
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      # Открываем стандартный порт Postgres на хосте
+      - "5432:5432"
+    restart: always
+
+  # ----------------------------------------
+  # 2. Redis (Кэширование)
+  # ----------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: exchanger-redis
+    ports:
+      # Открываем стандартный порт Redis на хосте
+      - "6379:6379"
+    restart: always
+
+  # ----------------------------------------
+  # 3. RabbitMQ (Брокер сообщений)
+  # ----------------------------------------
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: exchanger-rabbitmq
+    environment:
+      # Стандартные учетные данные для управления и подключения
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"   # Главный порт AMQP для подключения Spring
+      - "15672:15672" # Порт веб-интерфейса управления (доступен по http://localhost:15672)
+    restart: always
+
+# Определяем тома для сохранения данных
+volumes:
+  postgres_data:
