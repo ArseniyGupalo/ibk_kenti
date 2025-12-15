@@ -85,7 +85,7 @@
 <div class="container">
   <h2>Обмін Валют (REST API)</h2>
 
-  <form id="conversionForm">
+  <form id="conversionForm" method="post">
 
     <div class="form-group">
       <label for="amount">Сума для конвертації:</label>
@@ -134,7 +134,7 @@
 
       // 4. НАДАННЯ ЗАПИТУ (POST з JSON)
       try {
-          const response = await fetch('http://localhost:8080/convert', {
+          const response = await fetch('http://localhost:8080/api/currency/convert', {
               method: 'POST',
               headers: {
                   'Content-Type': 'application/json' // КЛЮЧОВИЙ МОМЕНТ: Вказуємо, що надсилаємо JSON

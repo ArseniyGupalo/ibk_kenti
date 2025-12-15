@@ -6,13 +6,11 @@ import com.example.exchanger.service.CurrencyConverterService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/currency")
+@CrossOrigin(origins = "http://localhost:8080")
 @Validated
 public class CurrencyConverterController {
     private final CurrencyConverterService currencyConverterService;
