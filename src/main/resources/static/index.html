@@ -8,6 +8,8 @@
 </head>
 <body>
 <div class="container">
+    <div class="rate-badge" id="rateInfo"></div>
+
     <h2>Currency Converter</h2>
 
     <div class="converter-box">
@@ -56,6 +58,7 @@
 
             // ⚠️ ОБЯЗАТЕЛЬНО — первый расчёт
             convert();
+            updateRateInfo();
 
         } catch (e) {
             console.error('Ошибка загрузки валют:', e);
@@ -89,8 +92,16 @@
         convert();
     });
 
-    currencyLeft.addEventListener('change', convert);
-    currencyRight.addEventListener('change', convert);
+    currencyLeft.addEventListener('change', () => {
+        convert();
+        updateRateInfo();
+    });
+
+    currencyRight.addEventListener('change', () => {
+        convert();
+        updateRateInfo();
+    });
+
 
     // ---------------- CONVERT ----------------
     function convert() {
@@ -127,6 +138,23 @@
             .replace(/[^0-9.]/g, '')    // только цифры и точка
             .replace(/(\..*)\./g, '$1'); // только одна точка
     }
+
+    // ---------------RATE_UPDATE---------------
+    const rateInfo = document.getElementById('rateInfo');
+
+    function updateRateInfo() {
+        if (!rates || Object.keys(rates).length === 0) return;
+
+        const from = currencyLeft.value;
+        const to = currencyRight.value;
+
+        if (!rates[from] || !rates[to]) return;
+
+        const rate = rates[to] / rates[from];
+
+        rateInfo.textContent = `1 ${from} = ${rate.toFixed(4)} ${to}`;
+    }
+
 
 </script>
 
