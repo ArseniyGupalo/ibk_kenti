@@ -36,10 +36,20 @@
     async function loadCurrencies() {
         try {
             const response = await fetch('http://localhost:8080/api/exchange/rates');
-            const currencies = await response.json();
+            const data = await response.json();
+            if (!data.rates) {
+                throw new Error('Поле rates отсутствует');
+            }
+
+
+            // Берём ключи объекта rates
+            const currencies = Object.keys(data.rates).sort();
+            console.log(data);
+            console.log(Object.keys(data.rates));
 
             fillSelect(currencyLeft, currencies, 'USD');
             fillSelect(currencyRight, currencies, 'EUR');
+
 
         } catch (e) {
             console.error('Не удалось загрузить валюты', e);
