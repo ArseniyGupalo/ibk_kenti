@@ -3,31 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link rel="stylesheet" href="css/style.css">
+
 </head>
 <body>
-<div class="form-group">
-    <label>З якої валюти</label>
-    <div style="display:flex; gap:10px;">
-        <input type="number" id="amountLeft" step="0.01" value="100">
-        <select id="currencyLeft">
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="UAH">UAH</option>
-        </select>
+<div class="container">
+    <h2>Currency Converter</h2>
+
+    <div class="converter-box">
+
+        <div class="currency-row">
+            <input type="number" id="amountLeft" step="0.01" value="100">
+            <select id="currencyLeft">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="UAH">UAH</option>
+            </select>
+        </div>
+
+        <div class="divider">⇄</div>
+
+        <div class="currency-row">
+            <input type="number" id="amountRight" step="0.01">
+            <select id="currencyRight">
+                <option value="EUR">EUR</option>
+                <option value="USD">USD</option>
+                <option value="UAH">UAH</option>
+            </select>
+        </div>
+
     </div>
 </div>
 
-<div class="form-group">
-    <label>У яку валюту</label>
-    <div style="display:flex; gap:10px;">
-        <input type="number" id="amountRight" step="0.01">
-        <select id="currencyRight">
-            <option value="EUR">EUR</option>
-            <option value="USD">USD</option>
-            <option value="UAH">UAH</option>
-        </select>
-    </div>
-</div>
 
 <script>
     const amountLeft = document.getElementById('amountLeft');

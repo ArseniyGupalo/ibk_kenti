@@ -1,0 +1,73 @@
+body {
+    font-family: 'Inter', 'Arial', sans-serif;
+    background: linear-gradient(135deg, #eef2f7, #d9e4f5);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+}
+
+.container {
+    background: #ffffff;
+    width: 420px;
+    padding: 30px;
+    border-radius: 18px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #1f2937;
+}
+
+.converter-box {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.currency-row {
+    display: flex;
+    align-items: center;
+    background: #f9fafb;
+    border-radius: 14px;
+    padding: 12px;
+    transition: box-shadow 0.3s ease;
+}
+
+.currency-row:focus-within {
+    box-shadow: 0 0 0 2px #3b82f6;
+}
+
+.currency-row input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    font-weight: bold;
+    outline: none;
+    color: #111827;
+}
+
+.currency-row select {
+    border: none;
+    background: #ffffff;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.currency-row select:focus {
+    outline: none;
+}
+
+.divider {
+    text-align: center;
+    font-size: 22px;
+    color: #6b7280;
+}
