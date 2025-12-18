@@ -13,27 +13,62 @@
     <div class="converter-box">
 
         <div class="currency-row">
-            <input type="number" id="amountLeft" step="0.01" value="100">
-            <select id="currencyLeft">
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="UAH">UAH</option>
-            </select>
+            <input type="number" id="amountLeft" step="0.01">
+            <select id="currencyLeft"></select>
         </div>
 
         <div class="divider">⇄</div>
 
         <div class="currency-row">
             <input type="number" id="amountRight" step="0.01">
-            <select id="currencyRight">
-                <option value="EUR">EUR</option>
-                <option value="USD">USD</option>
-                <option value="UAH">UAH</option>
-            </select>
+            <select id="currencyRight"></select>
         </div>
 
     </div>
 </div>
+<script>
+    const currencyLeft = document.getElementById('currencyLeft');
+    const currencyRight = document.getElementById('currencyRight');
+
+    // Загружаем список валют при старте страницы
+    document.addEventListener('DOMContentLoaded', loadCurrencies);
+
+    async function loadCurrencies() {
+        try {
+            const response = await fetch('http://localhost:8080/api/exchange/rates');
+            const currencies = await response.json();
+
+            fillSelect(currencyLeft, currencies, 'USD');
+            fillSelect(currencyRight, currencies, 'EUR');
+
+        } catch (e) {
+            console.error('Не удалось загрузить валюты', e);
+        }
+    }
+
+    // Универсальная функция наполнения select
+    function fillSelect(select, currencies, defaultValue) {
+        select.innerHTML = '';
+
+        currencies.forEach(code => {
+            const option = document.createElement('option');
+            option.value = code;
+            option.textContent = code;
+            select.appendChild(option);
+        });
+
+        if (defaultValue && currencies.includes(defaultValue)) {
+            select.value = defaultValue;
+        }
+    }
+
+    currencyLeft.addEventListener('change', () => {
+        if (currencyLeft.value === currencyRight.value) {
+            currencyRight.selectedIndex = 1;
+        }
+    });
+
+</script>
 
 
 <script>
