@@ -13,14 +13,14 @@
     <div class="converter-box">
 
         <div class="currency-row">
-            <input type="number" id="amountLeft" step="0.01">
+            <input type="text" inputmode="decimal" id="amountLeft">
             <select id="currencyLeft"></select>
         </div>
 
         <div class="divider">⇄</div>
 
         <div class="currency-row">
-            <input type="number" id="amountRight" step="0.01">
+            <input type="text" inputmode="decimal" id="amountRight">
             <select id="currencyRight"></select>
         </div>
 
@@ -78,11 +78,13 @@
 
     // ---------------- EVENTS ----------------
     amountLeft.addEventListener('input', () => {
+        sanitizeInput(amountLeft)
         activeInput = 'left';
         convert();
     });
 
     amountRight.addEventListener('input', () => {
+        sanitizeInput(amountRight)
         activeInput = 'right';
         convert();
     });
@@ -117,6 +119,15 @@
             amountLeft.value = result.toFixed(2);
         }
     }
+
+    // ---------------FILTER------------------
+    function sanitizeInput(input) {
+        input.value = input.value
+            .replace(',', '.')          // запятая → точка
+            .replace(/[^0-9.]/g, '')    // только цифры и точка
+            .replace(/(\..*)\./g, '$1'); // только одна точка
+    }
+
 </script>
 
 
