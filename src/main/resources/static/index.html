@@ -32,7 +32,7 @@
 
     // Загружаем список валют при старте страницы
     document.addEventListener('DOMContentLoaded', loadCurrencies);
-
+    let rates = {};
     async function loadCurrencies() {
         try {
             const response = await fetch('http://localhost:8080/api/exchange/rates');
@@ -41,6 +41,7 @@
                 throw new Error('Поле rates отсутствует');
             }
 
+            rates = data.rates;
 
             // Берём ключи объекта rates
             const currencies = Object.keys(data.rates).sort();
@@ -104,7 +105,7 @@
     currencyLeft.addEventListener('change', convert);
     currencyRight.addEventListener('change', convert);
 
-    async function convert() {
+    function convert() {
         let fromCurrency, toCurrency, amount;
 
         if (activeInput === 'left') {
@@ -117,32 +118,17 @@
             toCurrency = currencyLeft.value;
         }
 
-        if (isNaN(amount) || amount <= 0) return;
+        if (!amount || !rates[fromCurrency] || !rates[toCurrency]) return;
 
-        try {
-            const response = await fetch('http://localhost:8080/api/currency/convert', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fromCurrency, toCurrency, amount })
-            });
+        const result = amount * (rates[toCurrency] / rates[fromCurrency]);
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                console.error(data);
-                return;
-            }
-
-            if (activeInput === 'left') {
-                amountRight.value = data.convertedAmount.toFixed(2);
-            } else {
-                amountLeft.value = data.convertedAmount.toFixed(2);
-            }
-
-        } catch (e) {
-            console.error('API error', e);
+        if (activeInput === 'left') {
+            amountRight.value = result.toFixed(2);
+        } else {
+            amountLeft.value = result.toFixed(2);
         }
     }
+
 </script>
 
 </body>
