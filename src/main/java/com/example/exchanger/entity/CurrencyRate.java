@@ -1,6 +1,7 @@
 package com.example.exchanger.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,8 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "currency_rates")
-@Getter
-@Setter
+@Data
 public class CurrencyRate {
 
     @Id
