@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class="form-group">
+    <label>З якої валюти</label>
+    <div style="display:flex; gap:10px;">
+        <input type="number" id="amountLeft" step="0.01" value="100">
+        <select id="currencyLeft">
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="UAH">UAH</option>
+        </select>
+    </div>
+</div>
+
+<div class="form-group">
+    <label>У яку валюту</label>
+    <div style="display:flex; gap:10px;">
+        <input type="number" id="amountRight" step="0.01">
+        <select id="currencyRight">
+            <option value="EUR">EUR</option>
+            <option value="USD">USD</option>
+            <option value="UAH">UAH</option>
+        </select>
+    </div>
+</div>
+
+<script>
+    const amountLeft = document.getElementById('amountLeft');
+    const amountRight = document.getElementById('amountRight');
+    const currencyLeft = document.getElementById('currencyLeft');
+    const currencyRight = document.getElementById('currencyRight');
+
+    let activeInput = 'left';
+
+    // Слушаем ввод
+    amountLeft.addEventListener('input', () => {
+        activeInput = 'left';
+        convert();
+    });
+
+    amountRight.addEventListener('input', () => {
+        activeInput = 'right';
+        convert();
+    });
+
+    // Слушаем смену валют
+    currencyLeft.addEventListener('change', convert);
+    currencyRight.addEventListener('change', convert);
+
+    async function convert() {
+        let fromCurrency, toCurrency, amount;
+
+        if (activeInput === 'left') {
+            amount = parseFloat(amountLeft.value);
+            fromCurrency = currencyLeft.value;
+            toCurrency = currencyRight.value;
+        } else {
+            amount = parseFloat(amountRight.value);
+            fromCurrency = currencyRight.value;
+            toCurrency = currencyLeft.value;
+        }
+
+        if (isNaN(amount) || amount <= 0) return;
+
+        try {
+            const response = await fetch('http://localhost:8080/api/currency/convert', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fromCurrency, toCurrency, amount })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error(data);
+                return;
+            }
+
+            if (activeInput === 'left') {
+                amountRight.value = data.convertedAmount.toFixed(2);
+            } else {
+                amountLeft.value = data.convertedAmount.toFixed(2);
+            }
+
+        } catch (e) {
+            console.error('API error', e);
+        }
+    }
+</script>
+
+</body>
+</html>
