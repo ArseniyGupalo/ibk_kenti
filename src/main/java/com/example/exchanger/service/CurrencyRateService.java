@@ -1,5 +1,6 @@
 package com.example.exchanger.service;
 
+import com.example.exchanger.dto.ExchangeRateResponse;
 import com.example.exchanger.entity.CurrencyRate;
 import com.example.exchanger.repository.CurrencyRateRepo;
 import jakarta.transaction.Transactional;
@@ -18,16 +19,17 @@ public class CurrencyRateService {
     }
 
     @Transactional
-    public void saveRates(Map<String, Double> rates, String baseCurrency) {
+    public void saveRatesToDB(ExchangeRateResponse response) {
         LocalDateTime now = LocalDateTime.now();
 
-        rates.forEach((code, rate) -> {
-           CurrencyRate cr = new CurrencyRate();
-           cr.setCode(code);
-           cr.setBaseCurrency(baseCurrency);
-           cr.setRate(rate);
-           cr.setTimestamp(now);
-           currencyRateRepo.save(cr);
+        response.getRates().forEach((code, rate) -> {
+            CurrencyRate cr = new CurrencyRate();
+            cr.setCode(code);
+            cr.setBaseCurrency("USD"); // если API всегда возвращает к USD
+            cr.setRate(rate);
+            cr.setTimestamp(now);
+
+            currencyRateRepo.save(cr);
         });
     }
 

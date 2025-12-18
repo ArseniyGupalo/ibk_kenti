@@ -31,13 +31,15 @@ public class ExchangeRateService {
 
 
     private final Logger logger = LoggerFactory.getLogger(ExchangeRateService.class);
+    private final CurrencyRateService currencyRateService;
     private final CurrencyLayerApiService currencyLayerApiService;
     private final OpenExchangeRateApiService openExchangeRateApiService;
     private final ExchangeRateApiService exchangeRateApiService;
     private final ExchangeRateProducer exchangeRateProducer;
 
     @Autowired
-    public ExchangeRateService(CurrencyLayerApiService currencyLayerApiService, OpenExchangeRateApiService openExchangeRateApiService, ExchangeRateApiService exchangeRateApiService, ExchangeRateProducer exchangeRateProducer) {
+    public ExchangeRateService(CurrencyRateService currencyRateService, CurrencyLayerApiService currencyLayerApiService, OpenExchangeRateApiService openExchangeRateApiService, ExchangeRateApiService exchangeRateApiService, ExchangeRateProducer exchangeRateProducer) {
+        this.currencyRateService = currencyRateService;
         this.currencyLayerApiService = currencyLayerApiService;
         this.openExchangeRateApiService = openExchangeRateApiService;
         this.exchangeRateApiService = exchangeRateApiService;
@@ -91,6 +93,8 @@ public class ExchangeRateService {
 
     @CachePut(value = "exchangeRates")
     public ExchangeRateResponse updateRates() {
+        ExchangeRateResponse response = fetchAllExchangeRatesFromApi();
+        currencyRateService.saveRatesToDB(response);
         return fetchAllExchangeRatesFromApi();
     }
 
@@ -99,8 +103,9 @@ public class ExchangeRateService {
         logger.info("Clear cache");
     }
 
-    @Scheduled(fixedRate = 600000)
+    @Scheduled(fixedRate = 60000)
     public void refreshRates() {
+        ExchangeRateResponse updatedRates = updateRates();
         logger.info("Sending message to RabbitMQ for exchange rate update");
         exchangeRateProducer.sendMessage("Updated exchange rates");
     }
