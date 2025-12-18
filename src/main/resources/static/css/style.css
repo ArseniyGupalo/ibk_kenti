@@ -73,15 +73,48 @@ h2 {
     color: #6b7280;
 }
 
-.rate-badge {
-    position: absolute;
+.global-rates {
+    position: fixed;
     top: 20px;
     right: 20px;
-    background: #f3f4f6;
-    padding: 8px 14px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #1f2937;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    width: 220px;
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    font-family: Inter, Arial, sans-serif;
+    z-index: 9999;
 }
+
+.global-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #2563eb;
+    margin-bottom: 6px;
+}
+
+.global-base {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #111827;
+}
+
+.global-rates ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.global-rates li {
+    font-size: 13px;
+    padding: 4px 0;
+    color: #374151;
+    display: flex;
+    justify-content: space-between;
+}
+
+.global-rates li span {
+    font-weight: 600;
+}
+

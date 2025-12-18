@@ -7,25 +7,24 @@
 
 </head>
 <body>
+<div class="global-rates" id="globalRates">
+    <div class="global-title">Rates</div>
+    <div class="global-base" id="baseCurrencyLabel"></div>
+    <ul id="ratesList"></ul>
+</div>
+
 <div class="container">
-    <div class="rate-badge" id="rateInfo"></div>
-
     <h2>Currency Converter</h2>
-
     <div class="converter-box">
-
         <div class="currency-row">
             <input type="text" inputmode="decimal" id="amountLeft">
             <select id="currencyLeft"></select>
         </div>
-
         <div class="divider">⇄</div>
-
         <div class="currency-row">
             <input type="text" inputmode="decimal" id="amountRight">
             <select id="currencyRight"></select>
         </div>
-
     </div>
 </div>
 <script>
@@ -58,7 +57,7 @@
 
             // ⚠️ ОБЯЗАТЕЛЬНО — первый расчёт
             convert();
-            updateRateInfo();
+            updateGlobalRates();
 
         } catch (e) {
             console.error('Ошибка загрузки валют:', e);
@@ -94,12 +93,12 @@
 
     currencyLeft.addEventListener('change', () => {
         convert();
-        updateRateInfo();
+        updateGlobalRates();
     });
 
     currencyRight.addEventListener('change', () => {
         convert();
-        updateRateInfo();
+        updateGlobalRates();
     });
 
 
@@ -139,21 +138,36 @@
             .replace(/(\..*)\./g, '$1'); // только одна точка
     }
 
-    // ---------------RATE_UPDATE---------------
-    const rateInfo = document.getElementById('rateInfo');
 
-    function updateRateInfo() {
+    // ---------------RATE_UPDATE---------------
+    const trackedCurrencies = ['EUR', 'UAH', 'GBP', 'PLN', 'JPY'];
+    localStorage.setItem('trackedCurrencies', JSON.stringify(trackedCurrencies));
+    const ratesList = document.getElementById('ratesList');
+    const baseCurrencyLabel = document.getElementById('baseCurrencyLabel');
+
+    function updateGlobalRates() {
         if (!rates || Object.keys(rates).length === 0) return;
 
-        const from = currencyLeft.value;
-        const to = currencyRight.value;
+        const base = currencyLeft.value; // текущая выбранная валюта
+        baseCurrencyLabel.textContent = `Base: ${base}`;
 
-        if (!rates[from] || !rates[to]) return;
+        ratesList.innerHTML = '';
 
-        const rate = rates[to] / rates[from];
+        trackedCurrencies.forEach(code => {
+            if (!rates[code] || code === base) return;
 
-        rateInfo.textContent = `1 ${from} = ${rate.toFixed(4)} ${to}`;
+            const rate = rates[code] / rates[base];
+
+            const li = document.createElement('li');
+            li.innerHTML = `
+              <span>${code}</span>
+              <span>${rate.toFixed(4)}</span>
+            `;
+
+            ratesList.appendChild(li);
+        });
     }
+
 
 
 </script>
