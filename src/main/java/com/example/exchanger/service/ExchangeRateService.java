@@ -20,8 +20,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class ExchangeRateService {
@@ -41,32 +44,42 @@ public class ExchangeRateService {
         this.exchangeRateProducer = exchangeRateProducer;
     }
 
+    private CompletableFuture<ExchangeRateResponse> safeCall(
+            CompletableFuture<ExchangeRateResponse> future) {
+
+        return future
+                .orTimeout(2, TimeUnit.SECONDS)
+                .exceptionally(ex -> {
+                    logger.warn("API failed: {}", ex.getMessage());
+                    return null;
+                });
+    }
+
+
+
     private ExchangeRateResponse fetchAllExchangeRatesFromApi() {
         logger.info("Fetching exchange rates from API`s");
-        CompletableFuture<ExchangeRateResponse> fetchFromCurrencyLayerApi = currencyLayerApiService.getExchangeRate();
-        CompletableFuture<ExchangeRateResponse> fetchFromOpenExchangeRateApi = openExchangeRateApiService.getExchangeRate();
-        CompletableFuture<ExchangeRateResponse> fetchFromExchangeRateApi = exchangeRateApiService.getExchangeRate();
+        CompletableFuture<ExchangeRateResponse> fetchFromCurrencyLayerApi = safeCall(currencyLayerApiService.getExchangeRate());
+        CompletableFuture<ExchangeRateResponse> fetchFromOpenExchangeRateApi = safeCall(openExchangeRateApiService.getExchangeRate());
+        CompletableFuture<ExchangeRateResponse> fetchFromExchangeRateApi = safeCall(exchangeRateApiService.getExchangeRate());
 
-        CompletableFuture.allOf(fetchFromExchangeRateApi, fetchFromCurrencyLayerApi, fetchFromOpenExchangeRateApi).join();
-        try {
-           Map<String, Double> rateFromCurrencyLayerApi = fetchFromCurrencyLayerApi.get().getRates();
-           Map<String, Double> rateFromOpenExchangeRateApi = fetchFromOpenExchangeRateApi.get().getRates();
-           Map<String, Double> rateFromExchangeRateApi = fetchFromExchangeRateApi.get().getRates();
+        CompletableFuture.anyOf(fetchFromExchangeRateApi, fetchFromCurrencyLayerApi, fetchFromOpenExchangeRateApi).join();
 
-           Map<String, Double> mergedRates = new HashMap<>();
-           if (rateFromCurrencyLayerApi != null) mergedRates.putAll(rateFromCurrencyLayerApi);
-           if (rateFromOpenExchangeRateApi != null) mergedRates.putAll(rateFromOpenExchangeRateApi);
-           if (rateFromExchangeRateApi != null) mergedRates.putAll(rateFromExchangeRateApi);
+        Map<String, Double> mergedRates = new HashMap<>();
 
-           logger.info("Fetched {} exchange rates from API`s", mergedRates.size());
+        Stream.of(fetchFromCurrencyLayerApi, fetchFromOpenExchangeRateApi, fetchFromExchangeRateApi)
+                .map(CompletableFuture::join)      // join безопасен после exceptionally
+                .filter(Objects::nonNull)          // убираем упавшие API
+                .map(ExchangeRateResponse::getRates)
+                .filter(Objects::nonNull)
+                .forEach(mergedRates::putAll);
 
-           ExchangeRateResponse exchangeRateResponse = new ExchangeRateResponse();
-           exchangeRateResponse.setRates(mergedRates);
-           return exchangeRateResponse;
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            return new ExchangeRateResponse();
-        }
+        logger.info("Fetched {} exchange rates from APIs", mergedRates.size());
+
+        ExchangeRateResponse response = new ExchangeRateResponse();
+        response.setRates(mergedRates);
+        return response;
+
     }
 
     @Cacheable(value = "exchangeRates")

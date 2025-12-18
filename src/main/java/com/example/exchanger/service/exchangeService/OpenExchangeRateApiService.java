@@ -11,7 +11,7 @@ import java.util.concurrent.CompletableFuture;
 public class OpenExchangeRateApiService extends ExchangeService{
 
     public OpenExchangeRateApiService() {
-        super("https://openexchangerates.org/api/latest.json?app_id=8bc459f20137490da46facf2f5a72d79");
+        super("https://openexchangerates.org/api/latest.json?app_id=f4c1bab9d6ad4a8887e879b9811860f3");
     }
 
 

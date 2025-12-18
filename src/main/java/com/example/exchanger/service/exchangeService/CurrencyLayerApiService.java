@@ -15,7 +15,7 @@ public class CurrencyLayerApiService extends ExchangeService {
 
 
     public CurrencyLayerApiService() {
-        super("http://apilayer.net/api/live?access_key=36312fe35dce51f74ee8ffa64e11ac5f");
+        super("http://apilayer.net/api/live?access_key=e651a3d4ec05d47462f5931f5351415e");
     }
 
 

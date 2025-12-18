@@ -1,189 +1,96 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Конвертація Валют (AJAX)</title>
-  <style>
-    body {
-        font-family: 'Arial', sans-serif;
-        background-color: #f4f4f9;
-        color: #333;
-        margin: 20px;
-    }
-    .container {
-        max-width: 500px;
-        margin: 50px auto;
-        background: #ffffff;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-    }
-    h2 {
-        color: #007bff;
-        text-align: center;
-        margin-bottom: 30px;
-    }
-    .form-group {
-        margin-bottom: 20px;
-    }
-    label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: bold;
-        color: #555;
-    }
-    input[type="text"],
-    input[type="number"] {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        box-sizing: border-box;
-        font-size: 16px;
-    }
-    button {
-        width: 100%;
-        padding: 15px;
-        background-color: #28a745;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 18px;
-        transition: background-color 0.3s ease;
-    }
-    button:hover {
-        background-color: #218838;
-    }
-    .result-box, .error-box {
-        margin-top: 30px;
-        padding: 15px;
-        border-radius: 8px;
-        text-align: center;
-    }
-    .result-box {
-        background-color: #e9f7ff;
-        border: 1px solid #cce5ff;
-    }
-    .error-box {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-        font-weight: bold;
-    }
-    .amount-large {
-        font-size: 2em;
-        color: #28a745;
-        font-weight: bold;
-        margin: 10px 0;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <body>
-
-<div class="container">
-  <h2>Обмін Валют (REST API)</h2>
-
-  <form id="conversionForm" method="post">
-
-    <div class="form-group">
-      <label for="amount">Сума для конвертації:</label>
-      <input type="number" id="amount" name="amount"
-             placeholder="Введіть суму" required min="0.01" step="0.01" value="100.00">
+<div class="form-group">
+    <label>З якої валюти</label>
+    <div style="display:flex; gap:10px;">
+        <input type="number" id="amountLeft" step="0.01" value="100">
+        <select id="currencyLeft">
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="UAH">UAH</option>
+        </select>
     </div>
+</div>
 
-    <div class="form-group">
-      <label for="fromCurrency">Конвертувати З (3-х літерний код):</label>
-      <input type="text" id="fromCurrency" name="fromCurrency"
-             placeholder="Наприклад, USD" required maxlength="3" value="USD">
+<div class="form-group">
+    <label>У яку валюту</label>
+    <div style="display:flex; gap:10px;">
+        <input type="number" id="amountRight" step="0.01">
+        <select id="currencyRight">
+            <option value="EUR">EUR</option>
+            <option value="USD">USD</option>
+            <option value="UAH">UAH</option>
+        </select>
     </div>
-
-    <div class="form-group">
-      <label for="toCurrency">Конвертувати В (3-х літерний код):</label>
-      <input type="text" id="toCurrency" name="toCurrency"
-             placeholder="Наприклад, EUR" required maxlength="3" value="EUR">
-    </div>
-
-    <button type="submit">Конвертувати</button>
-  </form>
-
-  <div id="responseContainer">
-  </div>
-
 </div>
 
 <script>
-  // 1. ОТРИМАННЯ ЕЛЕМЕНТІВ
-  const form = document.getElementById('conversionForm');
-  const responseContainer = document.getElementById('responseContainer');
+    const amountLeft = document.getElementById('amountLeft');
+    const amountRight = document.getElementById('amountRight');
+    const currencyLeft = document.getElementById('currencyLeft');
+    const currencyRight = document.getElementById('currencyRight');
 
-  // 2. ОБРОБНИК ВІДПРАВЛЕННЯ ФОРМИ
-  form.addEventListener('submit', async function(event) {
-      event.preventDefault(); // Зупиняємо стандартну відправку форми браузером
+    let activeInput = 'left';
 
-      responseContainer.innerHTML = ''; // Очищаємо попередні результати
+    // Слушаем ввод
+    amountLeft.addEventListener('input', () => {
+        activeInput = 'left';
+        convert();
+    });
 
-      // 3. ЗБІР ДАНИХ З ПОЛІВ ФОРМИ
-      const requestBody = {
-          fromCurrency: document.getElementById('fromCurrency').value.toUpperCase(),
-          toCurrency: document.getElementById('toCurrency').value.toUpperCase(),
-          // Парсимо число, щоб забезпечити правильний тип даних для JSON
-          amount: parseFloat(document.getElementById('amount').value)
-      };
+    amountRight.addEventListener('input', () => {
+        activeInput = 'right';
+        convert();
+    });
 
-      // 4. НАДАННЯ ЗАПИТУ (POST з JSON)
-      try {
-          const response = await fetch('http://localhost:8080/api/currency/convert', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json' // КЛЮЧОВИЙ МОМЕНТ: Вказуємо, що надсилаємо JSON
-              },
-              body: JSON.stringify(requestBody) // Перетворюємо JavaScript-об'єкт на JSON-рядок
-          });
+    // Слушаем смену валют
+    currencyLeft.addEventListener('change', convert);
+    currencyRight.addEventListener('change', convert);
 
-          // 5. ОБРОБКА ВІДПОВІДІ
-          const data = await response.json();
+    async function convert() {
+        let fromCurrency, toCurrency, amount;
 
-          if (response.ok) {
-              // HTTP 200 OK (Успішна конвертація)
-              displaySuccess(data);
-          } else if (response.status === 400) {
-               // HTTP 400 Bad Request (Помилка валідації або непідтримувана валюта)
-              displayError(data.message || data);
-          } else {
-              // Інші помилки (500, 404 тощо)
-              displayError('Помилка сервера: ' + (data.message || response.statusText));
-          }
+        if (activeInput === 'left') {
+            amount = parseFloat(amountLeft.value);
+            fromCurrency = currencyLeft.value;
+            toCurrency = currencyRight.value;
+        } else {
+            amount = parseFloat(amountRight.value);
+            fromCurrency = currencyRight.value;
+            toCurrency = currencyLeft.value;
+        }
 
-      } catch (error) {
-          console.error('Fetch error:', error);
-          displayError('Неможливо підключитися до API. Перевірте, чи запущений Spring Boot.');
-      }
-  });
+        if (isNaN(amount) || amount <= 0) return;
 
-  // 6. ФУНКЦІЯ ДЛЯ ВІДОБРАЖЕННЯ УСПІШНОГО РЕЗУЛЬТАТУ
-  function displaySuccess(data) {
-      const html = `
-          <div class="result-box">
-              <p>Результат конвертації ${data.fromCurrency} у ${data.toCurrency}:</p>
-              <div class="amount-large">
-                  ${data.convertedAmount.toFixed(2)} ${data.toCurrency}
-              </div>
-              <div class="rate-info">
-                  (Курс: 1 ${data.fromCurrency} = ${data.exchangeRate.toFixed(4)} ${data.toCurrency})
-              </div>
-          </div>
-      `;
-      responseContainer.innerHTML = html;
-  }
+        try {
+            const response = await fetch('http://localhost:8080/api/currency/convert', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fromCurrency, toCurrency, amount })
+            });
 
-  // 7. ФУНКЦІЯ ДЛЯ ВІДОБРАЖЕННЯ ПОМИЛОК
-  function displayError(message) {
-      const html = `<div class="error-box">${message}</div>`;
-      responseContainer.innerHTML = html;
-  }
+            const data = await response.json();
 
+            if (!response.ok) {
+                console.error(data);
+                return;
+            }
+
+            if (activeInput === 'left') {
+                amountRight.value = data.convertedAmount.toFixed(2);
+            } else {
+                amountLeft.value = data.convertedAmount.toFixed(2);
+            }
+
+        } catch (e) {
+            console.error('API error', e);
+        }
+    }
 </script>
 
 </body>

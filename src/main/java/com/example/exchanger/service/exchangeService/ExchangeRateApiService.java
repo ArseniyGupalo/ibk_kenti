@@ -14,7 +14,7 @@ public class ExchangeRateApiService extends ExchangeService {
 
 
     public ExchangeRateApiService() {
-        super("https://v6.exchangerate-api.com/v6/dc7805e96778c2920dd1d894/latest/USD");
+        super("https://v6.exchangerate-api.com/v6/30ab173f9c765377a204b64e/latest/USD");
     }
 
 
